@@ -1,0 +1,74 @@
+**Nume: Titoc Oana Alexandra**
+**Grupa: 313CA**
+
+## Load Balancer - Tema2
+
+### Descriere:
+Problema isi propune implementarea unui Load Balancer prin Consistent Hashing.
+
+Pentru implementarea temei m-am folosit de functiile de LinkedList si Hashtable
+implementate la laborator. Am folosit 2 structuri ajutatoare pe langa
+load_balancer si server_memory: hash_ring_t in care am stocat etichetele
+sortate dupa hash pe hashring si hash_servers_t in care am stocat in ordinea
+in care s-au adaugat serverele, id-ul si hash-ul lor pentru a usura accesul
+la aceste date.
+
+Am implementat doua functii de cautare binara: una care cauta pozitia sererului
+pe care trebuie stocat un obiect (cheie, valoare) si una care cauta pozitia pe
+care trebuie adaugat un nou label pe hashring.
+
+### Adaugarea unui nou server in sistem:
+
+La adaugarea unui nou server in sistem am adaugat pe rand 3 clone ale acelui
+server. Am avut grija ca pentru fiecare clona sa aflu vecinul din fata si
+din spate (in sens orar). Astfel prin functia check_remap am aflat care chei
+ar trebui remapate la noua eticheta in functie de hash-ul etichetelor vecine
+si hash-ul cheii (cheia din vecinul din fata trebuia sa se afle intre vecinul
+din spate si noua eticheta).
+
+De fiecare data cand gaseam o cheie care trebuia remapata apelam functia
+server_store care stoca acea cheie pe noul server si apoi server_remove care
+stergea cheia de pe vechiul server.
+
+### Stergerea unui server din sistem:
+
+Pentru stergerea unui server din sistem am sters din vectorul de hash_ring_t
+toate etichetele serverului prin shiftari repetate de fiecare data cand am
+intalnit o eticheta cu id-ul = cu cel al serverului.
+
+Am parcurs tot hashtable-ul serverului care urma sa fie sters si pe fiecare
+cheie existenta in acesta am aplicat algoritmul de cautare binara pentru a afla
+serverul pe care trebuie remapata respectiva cheie.
+
+La final am sters toate resursele din acel server si am realocat memorie pentru
+toti vectorii folositi.
+
+### Stocarea unei chei in sistem (loader_store)
+
+Atunci cand voiam sa stochez o noua cheie in sistem, apelam functia de cautare
+binare care imi returna pozitia etichetei de pe hashring in care trebuia sa
+stochez cheia. Avand pozitia de pe hashring puteam sa aflu usor id-ul acelui
+server prin campul id din vectorul la structura hash_ring_t. Am cautat prin
+vectorul de servere care server are acel id si apoi am stocat pe acel server
+cheia si valoarea asociata acesteia cu ajutorul funtiei server_store.
+
+### Returnarea unei valori din sistem (loader_retrieve)
+
+Pentru returnarea unei anumite valori din hashring am urmat aceiasi pasi ca
+pentru adaugarea unei chei doar ca in loc de server_store am folosit
+server_retrieve care returneaza valoarea asociata unei chei.
+
+Am avut grija la final sa eliberez toata memoria atat a serverelor cat si
+a load_balancer-ului principal.
+
+
+### Comentarii asupra temei:
+
+* Dupa finalizarea acestei teme consider ca mi-am insusit mult mai bine lucrul
+cu hashtable-uri. Mi-a placut ideea de replicare a serverelor pentru eficienta
+sportita in stocarea obiectelor.
+* In ceea ce priveste implementarea mea, am incercat sa folosesc pe cat posibil
+algoritmi de cautare binara, sa fac programare defensiva, sa realoc memorie de
+fiecare data cand e necesar, insa mai eficient cred ca era daca alocam din start
+pentru fiecare vector un numar de elemente pe care il dublam la fiecare
+realocare.
